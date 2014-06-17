@@ -148,6 +148,11 @@ class CredisException extends Exception
  * @method string|int    script(string $command, string $arg1 = null)
  * @method string|int|array|bool eval(string $script, array $keys = NULL, array $args = NULL)
  * @method string|int|array|bool evalSha(string $script, array $keys = NULL, array $args = NULL)
+ *
+ * HyperLogLog
+ * @method int           pfadd(string $key, string $element)
+ * @method int           pfcount(string $key)
+ * @method int           pfmerge(string $destKey, string $sourceKey, string $sourceKeyN = null)
  */
 class Credis_Client {
 
@@ -284,7 +289,7 @@ class Credis_Client {
         $this->port = (int) $port;
         $this->timeout = $timeout;
         $this->persistent = (string) $persistent;
-        $this->standalone = ! extension_loaded('redis');
+        $this->standalone = !(extension_loaded('redis') && method_exists('Redis', 'pfadd'));
         $this->authPassword = $password;
         $this->selectedDb = (int)$db;
         $this->convertHost();
