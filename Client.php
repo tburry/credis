@@ -289,7 +289,7 @@ class Credis_Client {
         $this->port = (int) $port;
         $this->timeout = $timeout;
         $this->persistent = (string) $persistent;
-        $this->standalone = !(extension_loaded('redis') && method_exists('Redis', 'pfadd'));
+        $this->standalone = !extension_loaded('redis');
         $this->authPassword = $password;
         $this->selectedDb = (int)$db;
         $this->convertHost();
@@ -335,6 +335,26 @@ class Credis_Client {
         }
         $this->standalone = TRUE;
         return $this;
+    }
+
+    /**
+     * Require that a function exists or switch to standalone mode.
+     *
+     * Since the php redis extension may not contain some recent functionality, users of {@link Credis_Client} can specify
+     * some of the functions they want to use and have the client switch to standalone mode if they don't exists.
+     *
+     * @param  string $function The name of the redis function.
+     * @throws CredisException Throws an exception when the client is already connected to the server after forcing standalone mode.
+     */
+    public function requireFunction($function) {
+        if ($this->standalone) {
+            return;
+        }
+
+        // See if the function exists on the Redis object.
+        if (!method_exists('Redis', $function)) {
+            $this->forceStandalone();
+        }
     }
 
     /**
